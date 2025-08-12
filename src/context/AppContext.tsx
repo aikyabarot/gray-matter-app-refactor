@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, ReactNode } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Job, Candidate, Client } from '../types';
 import { MOCK_JOBS } from '../data/jobs';
 import { MOCK_CANDIDATES } from '../data/candidates';
@@ -7,7 +7,7 @@ import { MOCK_USERS_DB } from '../data/users';
 
 interface AppContextType {
   activeUser: User | null;
-  login: (user: User) => void;
+  login: (email: string) => void;
   logout: () => void;
   jobs: Job[];
   candidates: Candidate[];
@@ -30,9 +30,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // # INTEGRATE: Replace this mock loading with parallel API calls to fetch initial data.
-    const enrichedJobs = MOCK_JOBS.map(job => ({
+    const enrichedJobs = MOCK_JOBS.map((job: Job) => ({
       ...job,
-      clientName: MOCK_CLIENTS.find(c => c.id === job.clientId)?.name || 'Unknown',
+      clientName: MOCK_CLIENTS.find((c: Client) => c.id === job.clientId)?.name || 'Unknown',
     }));
     setJobs(enrichedJobs);
     setCandidates(MOCK_CANDIDATES);
@@ -45,9 +45,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => setToast({ show: false, message: '' }), 3000);
   };
 
-  const login = (user: User) => {
-    setActiveUser(user);
-    showToast(`Welcome, ${user.name}!`);
+  const login = (email: string) => {
+    // Find user by email
+    const user = MOCK_USERS_DB.find((u: User) => u.email === email);
+    if (user) {
+      setActiveUser(user);
+      showToast(`Welcome, ${user.name}!`);
+    }
   };
 
   const logout = () => setActiveUser(null);
@@ -67,4 +71,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const value = { activeUser, login, logout, jobs, candidates, clients, loading, toast, updateCandidateStatus, updateCandidateFeedback };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within an AppProvider');
+  }
+  return context;
 };

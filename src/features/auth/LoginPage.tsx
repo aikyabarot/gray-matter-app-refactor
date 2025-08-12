@@ -1,22 +1,17 @@
-import React, { useState } from 'react';
-import { MOCK_USERS_DB } from '../../data/users';
-import { User } from '../../types';
+import { useState } from 'react';
+import { useAppContext } from '../../context/AppContext';
 
-interface LoginPageProps {
-  onLogin: (user: User) => void;
-}
-
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { login } = useAppContext();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // # INTEGRATE: Replace this mock validation with an API call to your authentication endpoint.
-    const user = MOCK_USERS_DB.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (user && password === "password") {
-      onLogin(user);
+    // Simplified login - in a real app you'd validate password
+    if (password === "password" || password === "") {
+      login(email);
     } else {
       setError("Invalid credentials. Please try again.");
     }
@@ -38,15 +33,39 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-700">Email Address</label>
-              <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3 py-2 border rounded-md"/>
+              <input 
+                id="email" 
+                type="email" 
+                required 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Try: admin@graymatter.com"
+              />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
-              <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 border rounded-md"/>
+              <input 
+                id="password" 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Use 'password' or leave empty"
+              />
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
             <button type="submit" className="w-full py-3 text-white bg-teal-600 hover:bg-teal-700 rounded-md">Sign In</button>
           </form>
+          
+          <div className="mt-6 text-xs text-slate-500">
+            <p>Demo accounts:</p>
+            <ul className="mt-1 space-y-1">
+              <li>admin@graymatter.com</li>
+              <li>recruiter@graymatter.com</li>
+              <li>manager@graymatter.com</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
